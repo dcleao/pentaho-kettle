@@ -22,6 +22,7 @@
 
 package org.pentaho.di.connections;
 
+import org.pentaho.di.connections.utils.ConnectionTestOptions;
 import org.pentaho.di.connections.utils.EncryptUtils;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.variables.VariableSpace;
@@ -259,6 +260,19 @@ public class ConnectionManager {
     ConnectionProvider<T> connectionProvider =
       (ConnectionProvider<T>) connectionProviders.get( connectionDetails.getType() );
     return connectionProvider.test( connectionDetails );
+  }
+
+  /**
+   * Run a test operation on the named connection
+   *
+   * @param connectionDetails The named connection details to test
+   * @return A boolean signifying the success of the test operation
+   */
+  @SuppressWarnings( "unchecked" )
+  public <T extends ConnectionDetails> boolean test( T connectionDetails, boolean ignoreRootPath ) throws KettleException {
+    ConnectionProvider<T> connectionProvider =
+        (ConnectionProvider<T>) connectionProviders.get( connectionDetails.getType() );
+    return connectionProvider.test( connectionDetails, new ConnectionTestOptions( ignoreRootPath ) );
   }
 
   /**

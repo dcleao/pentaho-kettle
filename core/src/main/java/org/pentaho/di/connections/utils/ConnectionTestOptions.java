@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2019-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -19,34 +19,21 @@
  * limitations under the License.
  *
  ******************************************************************************/
+package org.pentaho.di.connections.utils;
 
-package org.pentaho.di.connections;
+public class ConnectionTestOptions {
 
-import org.pentaho.di.connections.utils.ConnectionTestOptions;
-import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.variables.VariableSpace;
-
-import java.util.List;
-
-/**
- * Created by bmorrise on 2/12/19.
- */
-public interface ConnectionProvider<T extends ConnectionDetails> {
-  String getName();
-
-  String getKey();
-
-  Class<T> getClassType();
-
-  List<String> getNames();
-
-  List<T> getConnectionDetails();
-
-  boolean test( T connectionDetails ) throws KettleException;
-
-  default boolean test( T connectionDetails, ConnectionTestOptions connectionTestOptions ) throws KettleException {
-    return test( connectionDetails );
+  public ConnectionTestOptions( boolean ignoreRootPath ) {
+    this.ignoreRootPath = ignoreRootPath;
   }
 
-  T prepare( T connectionDetails ) throws KettleException;
+  private boolean ignoreRootPath = true;
+
+  public boolean isIgnoreRootPath() {
+    return ignoreRootPath;
+  }
+
+  public void setIgnoreRootPath( boolean ignoreRootPath ) {
+    this.ignoreRootPath = ignoreRootPath;
+  }
 }

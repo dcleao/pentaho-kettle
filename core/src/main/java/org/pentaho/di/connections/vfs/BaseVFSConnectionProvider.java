@@ -22,13 +22,19 @@
 
 package org.pentaho.di.connections.vfs;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.vfs2.FileSystemException;
 import org.pentaho.di.connections.ConnectionDetails;
 import org.pentaho.di.connections.ConnectionManager;
+import org.pentaho.di.connections.utils.ConnectionTestOptions;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.value.ValueMetaBase;
 import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
+
+import org.apache.commons.vfs2.FileObject;
 
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +43,7 @@ import java.util.function.Supplier;
 public abstract class BaseVFSConnectionProvider<T extends VFSConnectionDetails> implements VFSConnectionProvider<T> {
 
   private Supplier<ConnectionManager> connectionManagerSupplier = ConnectionManager::getInstance;
+  private static final Log LOGGER = LogFactory.getLog( BaseVFSConnectionProvider.class );
 
   @Override public List<String> getNames() {
     return connectionManagerSupplier.get().getNamesByType( getClass() );
@@ -49,6 +56,41 @@ public abstract class BaseVFSConnectionProvider<T extends VFSConnectionDetails> 
 
   @Override public T prepare( T connectionDetails ) throws KettleException {
     return connectionDetails;
+  }
+
+  @Override
+  public boolean test( T connectionDetails, ConnectionTestOptions connectionTestOptions ) throws KettleException {
+    boolean valid = test( connectionDetails );
+    if ( !valid ) {
+      return false;
+    }
+
+    if ( connectionDetails.supportsRootPath()  && !connectionTestOptions.isIgnoreRootPath() ) {
+      if ( connectionDetails.isRootPathRequired() && connectionDetails.getRootPath() == null ) {
+        return false;
+      }
+
+      FileObject fileObject = getDirectFile( connectionDetails, connectionDetails.getRootPath() );
+
+      try {
+        // Check exists... pvfs://connection name ->  exists ?
+        // 1. External path / Generic file path: pvfs://connection name/foo // ConnectionFileProvider  END USER
+        // 2. Internal path / Apache VFS path / Connection path: s3-avfs://foo + FSOptions (Connection Name)
+        // 3. Physical path: S3 API actually knows of: s3://root/path/here/foo  ADMIN USER will config the root physical path
+
+        // Local
+        // 2. Internal path: local://foo + FSOptions (Connection Name, Root Path...)
+        // 3. Physical path: c:/root/path/here/foo
+        // KettleVFS.getFileObject() -->> FileObject -->> FileName -->> FileSystem
+        if ( connectionDetails.getRootPath() != null && !fileObject.exists() ) {
+          return false;
+        }
+      } catch ( FileSystemException fileSystemException ) {
+        LOGGER.error(fileSystemException.getMessage() );
+      }
+    }
+
+    return true;
   }
 
   @Override public String sanitizeName( String string ) {

@@ -23,6 +23,7 @@
 package org.pentaho.di.connections;
 
 import org.pentaho.di.connections.utils.ConnectionDetailsUtils;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.metastore.api.exceptions.MetaStoreException;
 
@@ -40,6 +41,21 @@ public interface ConnectionDetails {
   String getType();
 
   String getDescription();
+
+  // metadata
+  default boolean supportsRootPath() {
+    return false;
+  }
+
+  default boolean isRootPathRequired() {
+    return false;
+  }
+
+  default String getRootPath() {
+    return null;
+  }
+
+  default void setRootPath( String rootPath ) {}
 
   /**
    * Gets props associated with this ConnectionDetails.
