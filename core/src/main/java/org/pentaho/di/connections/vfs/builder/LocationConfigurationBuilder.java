@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2019-2024 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,34 +22,16 @@
 
 package org.pentaho.di.connections.vfs.builder;
 
-import org.apache.commons.vfs2.FileSystemConfigBuilder;
+import org.apache.commons.vfs2.FileSystem;
 import org.apache.commons.vfs2.FileSystemOptions;
 
-/**
- * Created by bmorrise on 11/7/18.
- */
-public abstract class VFSConnectionConfigurationBuilder extends FileSystemConfigBuilder {
-
-  private static final String LOCATION = "location";
-  private FileSystemOptions fileSystemOptions;
-
-  protected VFSConnectionConfigurationBuilder( FileSystemOptions fileSystemOptions ) {
-    this.fileSystemOptions = fileSystemOptions;
+public class LocationConfigurationBuilder extends VFSConnectionConfigurationBuilder {
+  public LocationConfigurationBuilder( FileSystemOptions fileSystemOptions ) {
+    super( fileSystemOptions );
   }
 
-  public FileSystemOptions getFileSystemOptions() {
-    return fileSystemOptions;
-  }
-
-  public void setFileSystemOptions( FileSystemOptions fileSystemOptions ) {
-    this.fileSystemOptions = fileSystemOptions;
-  }
-
-  public String getLocation() {
-    return this.getParam( getFileSystemOptions(), LOCATION );
-  }
-
-  public void setLocation( String location ) {
-    this.setParam( getFileSystemOptions(), LOCATION, location );
+  @Override
+  protected Class<? extends FileSystem> getConfigClass() {
+    throw new UnsupportedOperationException();
   }
 }
